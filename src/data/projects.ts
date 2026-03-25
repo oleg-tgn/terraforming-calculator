@@ -1693,8 +1693,7 @@ export const projects: CardsMap = {
   InvestmentLoan: {
     cardNum: "151",
     type: "proj",
-    tags: ["earth"],
-    tags: ["event"],
+    tags: ["earth", "event"],
     cost: 3,
     resources: { mc: 10 },
     prod: { mc: -1 },
@@ -1704,6 +1703,7 @@ export const projects: CardsMap = {
   Insulation: {
     cardNum: "152",
     type: "proj",
+    tags: [],
     cost: 2,
     resources: {},
     prod: {},
@@ -1726,6 +1726,7 @@ export const projects: CardsMap = {
   CaretakerContract: {
     cardNum: "154",
     type: "proj",
+    tags: [],
     cost: 3,
     resources: {},
     prod: {},
@@ -1834,6 +1835,7 @@ export const projects: CardsMap = {
   MicroMills: {
     cardNum: "164",
     type: "proj",
+    tags: [],
     cost: 3,
     resources: {},
     prod: { heat: 1 },
@@ -1932,6 +1934,7 @@ export const projects: CardsMap = {
   ProtectedHabitats: {
     cardNum: "173",
     type: "proj",
+    tags: [],
     cost: 5,
     resources: {},
     prod: {},
@@ -2013,7 +2016,7 @@ export const projects: CardsMap = {
     tags: ["building"],
     cost: 6,
     resources: {},
-    prod: { mc: 1, ti: 1 },
+    prod: { mc: 1, energy: 1, ti: 1 },
     decreaseProd: { energy: 1 },
     color: "green",
     cardExtra: "",
@@ -2035,7 +2038,7 @@ export const projects: CardsMap = {
     tags: ["city", "building"],
     cost: 11,
     resources: { city: 1 },
-    prod: { mc: 3 },
+    prod: { mc: 3, energy: 1 },
     decreaseProd: { energy: 1 },
     vp: -2,
     color: "green",
