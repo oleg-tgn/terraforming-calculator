@@ -31,7 +31,7 @@ export interface Resources {
   tr?: number;
   prelude?: number;
   award?: number;
-  draw?: number;
+  draw?: { [key in Tag]?: number };
 }
 
 export interface Requirements {

@@ -1,4 +1,4 @@
-import type { CardsMap } from '@/types/card'
+import type { CardsMap } from "@/types/card";
 
 export const preludes: CardsMap = {
   AlliedBanks: {
@@ -317,4 +317,4 @@ export const preludes: CardsMap = {
     color: "green",
     cardExtra: "",
   },
-}
+};
