@@ -39,14 +39,18 @@
         <div class="card-body">
           <h2 class="card-title">Выберите карту для анализа</h2>
 
-          <div class="form-control">
-            <label class="label cursor-pointer justify-start gap-3">
-              <input
-                type="checkbox"
-                v-model="showOnlyPositiveMC"
-                class="checkbox checkbox-primary"
-              />
-              <span class="label-text">Только карты с prod.mc > 0</span>
+          <div class="flex gap-4">
+            <label class="label cursor-pointer gap-2">
+              <input type="checkbox" v-model="showGreen" class="checkbox checkbox-success" />
+              <span class="label-text">Зелёные</span>
+            </label>
+            <label class="label cursor-pointer gap-2">
+              <input type="checkbox" v-model="showRed" class="checkbox checkbox-error" />
+              <span class="label-text">Красные</span>
+            </label>
+            <label class="label cursor-pointer gap-2">
+              <input type="checkbox" v-model="showBlue" class="checkbox checkbox-info" />
+              <span class="label-text">Синие</span>
             </label>
           </div>
 
@@ -169,13 +173,17 @@ const cardsList = computed<CardWithName[]>(() =>
 const currentGen = ref(2);
 const targetGen = ref(10);
 const selectedCard = ref<CardWithName | null>(null);
-const showOnlyPositiveMC = ref(false);
+const showGreen = ref(true);
+const showRed = ref(true);
+const showBlue = ref(true);
 
-const filteredCardsList = computed(() =>
-  showOnlyPositiveMC.value
-    ? cardsList.value.filter((card) => (card.prod?.mc ?? 0) > 0)
-    : cardsList.value
-);
+const filteredCardsList = computed(() => {
+  const colors = new Set<string>();
+  if (showGreen.value) colors.add("green");
+  if (showRed.value) colors.add("red");
+  if (showBlue.value) colors.add("blue");
+  return cardsList.value.filter((card) => colors.has(card.color));
+});
 
 const resourceTypes = ["mc", "steel", "ti", "plant", "energy", "heat"] as const;
 type ResourceType = (typeof resourceTypes)[number];
