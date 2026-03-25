@@ -40,8 +40,8 @@
           <h2 class="card-title">Выберите карту для анализа</h2>
           <select v-model="selectedCard" class="select select-bordered w-full">
             <option :value="null" disabled>Выберите карту...</option>
-            <option v-for="card in cards" :key="card.id" :value="card">
-              {{ card.name }} ({{ card.cost }} M€)
+            <option v-for="card in cardsList" :key="card.cardNum" :value="card">
+              {{ card.name }} ({{ card.cost ?? 0 }} M€)
             </option>
           </select>
         </div>
@@ -55,7 +55,7 @@
             <div class="stat">
               <div class="stat-title">Затраты</div>
               <div class="stat-value text-lg">
-                {{ selectedCard.cost + 3 }} M€
+                {{ (selectedCard.cost ?? 0) + 3 }} M€
               </div>
               <div class="stat-desc">покупка + розыгрыш</div>
             </div>
@@ -93,23 +93,23 @@
 
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import cardsData from "./assets/cards.json";
+import { projects } from "@/data";
+import type { Card } from "@/types/card";
 
-interface Card {
-  id: number;
+interface CardWithName extends Card {
   name: string;
-  cost: number;
-  production: {
-    megacredits: number;
-  };
-  vp: number;
-  tags: string[];
 }
 
-const cards = ref<Card[]>(cardsData);
+const cardsList = computed<CardWithName[]>(() =>
+  Object.entries(projects).map(([name, card]) => ({
+    ...card as Card,
+    name
+  }))
+);
+
 const currentGen = ref(2);
 const targetGen = ref(10);
-const selectedCard = ref<Card | null>(null);
+const selectedCard = ref<CardWithName | null>(null);
 
 const calculateROI = computed(() => {
   if (!selectedCard.value) return { income: 0, vp: 0, total: 0 };
@@ -117,9 +117,10 @@ const calculateROI = computed(() => {
   const card = selectedCard.value;
   const gensRemaining = targetGen.value - currentGen.value;
 
-  const income = (card.production.megacredits || 0) * gensRemaining;
-  const vp = card.vp;
-  const total = income - (card.cost + 3);
+  const income = (card.prod.mc ?? 0) * gensRemaining;
+  const vp = card.vp ?? 0;
+  const cost = card.cost ?? 0;
+  const total = income - (cost + 3);
 
   return { income, vp, total };
 });
