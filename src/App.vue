@@ -38,9 +38,25 @@
       <div class="card bg-base-100 shadow-xl mb-6">
         <div class="card-body">
           <h2 class="card-title">Выберите карту для анализа</h2>
+
+          <div class="form-control">
+            <label class="label cursor-pointer justify-start gap-3">
+              <input
+                type="checkbox"
+                v-model="showOnlyPositiveMC"
+                class="checkbox checkbox-primary"
+              />
+              <span class="label-text">Только карты с prod.mc > 0</span>
+            </label>
+          </div>
+
           <select v-model="selectedCard" class="select select-bordered w-full">
             <option :value="null" disabled>Выберите карту...</option>
-            <option v-for="card in cardsList" :key="card.cardNum" :value="card">
+            <option
+              v-for="card in filteredCardsList"
+              :key="card.cardNum"
+              :value="card"
+            >
               {{ card.name }} ({{ card.cost ?? 0 }} M€)
             </option>
           </select>
@@ -61,13 +77,6 @@
             </div>
 
             <div class="stat">
-              <div class="stat-title">Доход до {{ targetGen }} пок.</div>
-              <div class="stat-value text-lg text-info">
-                {{ calculateROI.income }} M€
-              </div>
-            </div>
-
-            <div class="stat">
               <div class="stat-title">Победные очки</div>
               <div class="stat-value text-lg text-secondary">
                 {{ calculateROI.vp }} ПО
@@ -77,7 +86,38 @@
 
           <div class="divider"></div>
 
-          <div class="text-center">
+          <h3 class="font-semibold mb-2">
+            Итог по поколениям (если сыграть в X поколении)
+          </h3>
+          <div class="overflow-x-auto">
+            <table class="table table-compact w-full">
+              <tbody>
+                <tr>
+                  <th class="text-right">GEN</th>
+                  <td
+                    v-for="gen in generationResults"
+                    :key="gen.gen"
+                    class="text-center"
+                  >
+                    {{ gen.gen }}
+                  </td>
+                </tr>
+                <tr>
+                  <th class="text-right">M€</th>
+                  <td
+                    v-for="gen in generationResults"
+                    :key="gen.gen"
+                    class="text-center font-bold"
+                    :class="gen.total >= 0 ? 'text-success' : 'text-error'"
+                  >
+                    {{ gen.total }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="text-center mt-4">
             <div
               class="badge badge-lg text-xl p-4"
               :class="calculateROI.total >= 0 ? 'badge-success' : 'badge-error'"
@@ -102,14 +142,21 @@ interface CardWithName extends Card {
 
 const cardsList = computed<CardWithName[]>(() =>
   Object.entries(projects).map(([name, card]) => ({
-    ...card as Card,
-    name
-  }))
+    ...(card as Card),
+    name,
+  })),
 );
 
 const currentGen = ref(2);
 const targetGen = ref(10);
 const selectedCard = ref<CardWithName | null>(null);
+const showOnlyPositiveMC = ref(false);
+
+const filteredCardsList = computed(() =>
+  showOnlyPositiveMC.value
+    ? cardsList.value.filter((card) => (card.prod?.mc ?? 0) > 0)
+    : cardsList.value,
+);
 
 const calculateROI = computed(() => {
   if (!selectedCard.value) return { income: 0, vp: 0, total: 0 };
@@ -123,5 +170,23 @@ const calculateROI = computed(() => {
   const total = income - (cost + 3);
 
   return { income, vp, total };
+});
+
+const generationResults = computed(() => {
+  if (!selectedCard.value) return [];
+
+  const card = selectedCard.value;
+  const cost = (card.cost ?? 0) + 3;
+  const mcProd = card.prod.mc ?? 0;
+  const results = [];
+
+  for (let gen = currentGen.value; gen <= targetGen.value; gen++) {
+    const gensPassed = gen - currentGen.value;
+    const income = mcProd * gensPassed;
+    const total = income - cost;
+    results.push({ gen, total });
+  }
+
+  return results;
 });
 </script>
