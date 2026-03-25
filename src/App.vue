@@ -50,16 +50,7 @@
             </label>
           </div>
 
-          <select v-model="selectedCard" class="select select-bordered w-full">
-            <option :value="null" disabled>Выберите карту...</option>
-            <option
-              v-for="card in filteredCardsList"
-              :key="card.cardNum"
-              :value="card"
-            >
-              {{ card.name }} ({{ card.cost ?? 0 }} M€)
-            </option>
-          </select>
+          <CardSelect v-model="selectedCard" :options="filteredCardsList" />
         </div>
       </div>
 
@@ -155,17 +146,24 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { projects } from "@/data";
+import CardSelect from "@/components/CardSelect.vue";
 import type { Card } from "@/types/card";
 
 interface CardWithName extends Card {
   name: string;
 }
 
+function formatCardName(name: string): string {
+  return name.replace(/([a-z])([A-Z])/g, "$1 $2");
+}
+
 const cardsList = computed<CardWithName[]>(() =>
-  Object.entries(projects).map(([name, card]) => ({
-    ...(card as Card),
-    name,
-  })),
+  Object.entries(projects)
+    .map(([name, card]) => ({
+      ...(card as Card),
+      name: formatCardName(name),
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name)),
 );
 
 const currentGen = ref(2);
@@ -176,7 +174,7 @@ const showOnlyPositiveMC = ref(false);
 const filteredCardsList = computed(() =>
   showOnlyPositiveMC.value
     ? cardsList.value.filter((card) => (card.prod?.mc ?? 0) > 0)
-    : cardsList.value,
+    : cardsList.value
 );
 
 const resourceTypes = ["mc", "steel", "ti", "plant", "energy", "heat"] as const;
